@@ -1,26 +1,44 @@
+/*
+ * Loaded on every route. Only the cascade-layer order and Tailwind live here.
+ * Ant Design (clinic app and parent portal) injects into the `antd` layer,
+ * above Tailwind's `base` reset, so the reset never overrides antd. The
+ * website's own styles are in app/(site)/site.css.
+ */
+@layer theme, base, antd, components, utilities;
+
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Website design tokens (used only by app/(site) through Tailwind utilities). */
+@theme {
+  --color-paper: #f5f7fa;
+  --color-surface: #fdfeff;
+  --color-ink: #18213a;
+  --color-ink-soft: #4a5470;
+  --color-ink-muted: #5e6780;
+  --color-harbour: #2f55a4;
+  --color-harbour-deep: #24447f;
+  --color-mist: #e4eaf5;
+  --color-mist-strong: #d5deee;
+  --color-marigold: #f0b44c;
+  --color-marigold-soft: #fbefd6;
+  --color-line: #dce2ec;
+  --color-field: #7c869c;
+  --color-danger: #b3261e;
+  /* Fonts from next/font in app/layout.tsx. */
+  --font-display: var(--font-sansation), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-atkinson), ui-sans-serif, system-ui, sans-serif;
+  --font-accent: var(--font-lemonada), ui-sans-serif, system-ui, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }

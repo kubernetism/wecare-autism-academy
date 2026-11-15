@@ -1,0 +1,65 @@
+/*
+ * Website-only styles. Everything else is Tailwind utilities with the tokens
+ * in app/globals.css (@theme). No Ant Design on the website.
+ */
+
+@layer base {
+  .site-root {
+    font-family: var(--font-body);
+    color: var(--color-ink);
+    background: var(--color-paper);
+    -webkit-font-smoothing: antialiased;
+  }
+  .site-root :focus-visible {
+    outline: 3px solid var(--color-harbour);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  /* Sansation for headings (bold), Atkinson for everything else. */
+  .site-root h1,
+  .site-root h2,
+  .site-root h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+  .site-root p {
+    text-wrap: pretty;
+  }
+  html:has(.site-root) {
+    scroll-padding-top: 96px;
+  }
+}
+
+@layer components {
+  /* Quiet dot grid, the texture of a visual-schedule board. */
+  .board-dots {
+    background-color: var(--color-mist);
+    background-image: radial-gradient(color-mix(in oklab, var(--color-harbour) 18%, transparent) 1.2px, transparent 1.3px);
+    background-size: 22px 22px;
+  }
+
+  .skip-link {
+    position: absolute;
+    left: 16px;
+    top: -100px;
+    z-index: 60;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+  .skip-link:focus {
+    top: 12px;
+  }
+
+  /* Whole card clickable via its main link, without nesting interactive elements. */
+  .stretched-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+}

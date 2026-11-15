@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WeCare Autism Academy
 
-## Getting Started
+One Next.js app with three areas (see `design/system-design.md`):
 
-First, run the development server:
+| Area | Path | Who |
+|---|---|---|
+| Public website | `/` (`app/(site)`) | Everyone |
+| Parent portal | `/portal` (`app/(portal)`) | Parents (self-registered) |
+| Clinic app (installable PWA) | `/app` (`app/(clinic)/app`) | Admin and staff |
+
+Stack: Next.js 16 (App Router), React 19, Drizzle ORM on Postgres (Neon in production), Better Auth
+(email and password), Zod.
+
+- Clinic app and parent portal: stock Ant Design 6 (default theme and layout, no visual overrides).
+- Public website: its own design built with Tailwind 4, Phosphor icons and native accessible forms.
+  It does not load Ant Design.
+
+## Local setup
 
 ```bash
+npm install
+cp .env.example .env.local          # then set BETTER_AUTH_SECRET (openssl rand -base64 32)
+npm run db:up                       # local Postgres in Docker on 127.0.0.1:5433
+npm run db:migrate                  # schema + reference data (therapies, clinic profile row)
+ADMIN_EMAIL=you@example.com ADMIN_NAME="Your Name" ADMIN_PASSWORD='at-least-10-chars' \
+  npm run db:create-admin           # first administrator
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Sign in at `/login`. Admins create staff accounts in the clinic app under Settings > Users and roles.
+Parents register at `/register`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Script | What it does |
+|---|---|
+| `npm run dev` / `build` / `start` | Next.js |
+| `npm run lint` / `typecheck` / `test` | ESLint, `next typegen && tsc`, Vitest unit tests |
+| `npm run db:generate` | Generate a SQL migration from `db/schema` changes (review it before committing) |
+| `npm run db:migrate` | Apply migrations (uses `DATABASE_URL_UNPOOLED` if set, else `DATABASE_URL`) |
+| `npm run db:up` / `db:down` | Start or stop the local Docker database |
 
-## Learn More
+## Where things live
 
-To learn more about Next.js, take a look at the following resources:
+- `db/schema/` tables, `db/migrations/` generated SQL (0001 seeds reference data)
+- `lib/permissions.ts` the roles matrix as `can(actor, action, resource)` (tested in `lib/permissions.test.ts`)
+- `server/` server-only code: auth, session (data access layer), services, Server Actions
+- `lib/validation/` Zod schemas shared by forms and Server Actions
+- `app/(site)/site.css` and the `@theme` tokens in `app/globals.css` the website design system
+- `components/site/` website components (header, footer, journey board, form kit); `components/clinic/` clinic app
+- `content/therapies.ts` website copy for the four therapy lines
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Notes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Authorization is enforced in the service layer on every read and write. `proxy.ts` only redirects
+  visitors without a session cookie, and layouts only route people to the right area.
+- Cache Components is turned off on purpose (see the comment in `next.config.ts`): Ant Design's
+  CSS-in-JS (used in the clinic app and portal) is not compatible with it yet.
+- Clinic contact details are never invented: empty fields show "To be confirmed" on the website until
+  an admin fills them in under Content > About details.
